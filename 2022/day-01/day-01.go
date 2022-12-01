@@ -56,8 +56,8 @@ func getCalorieCountPerElfFromInput() []int {
 }
 
 // partOne solves the first part of the Advent of Code day 01.
+// Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
 func partOne(sortedCalorieCountPerElf []int) {
-	// Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
 	fmt.Println("Solution for part 1:")
 
 	highestCalories := sortedCalorieCountPerElf[len(sortedCalorieCountPerElf)-1]
@@ -66,8 +66,8 @@ func partOne(sortedCalorieCountPerElf []int) {
 }
 
 // partTwo solves the second part of the Advent of Code day 01.
+// Find the top three Elves carrying the most Calories. How many Calories are those Elves carrying in total?
 func partTwo(sortedCalorieCountPerElf []int) {
-	// Find the top three Elves carrying the most Calories. How many Calories are those Elves carrying in total?
 	fmt.Println("Solution for part 2:")
 
 	numberOfElves := 3
