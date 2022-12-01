@@ -8,84 +8,78 @@ import (
 	"strconv"
 )
 
-func findMaxElement(arr []int) int {
-	max_num := arr[0]
-	for i := 0; i < len(arr); i++ {
-		if arr[i] > max_num {
-			max_num = arr[i]
-		}
-	}
-	return max_num
-}
-
+// sum calculates the sum of the values in the provided array.
 func sum(array []int) int {
-	result := 0
-	for _, v := range array {
-		result += v
+	sumOfValues := 0
+	for _, value := range array {
+		sumOfValues += value
 	}
-	return result
+	return sumOfValues
 }
 
-func main() {
+// getCalorieCountPerElfFromInput reads the input file and gets an ordered calorie count per Elf.
+// It sums the calories per Elf and then sorts the calorie sums in ascending order.
+func getCalorieCountPerElfFromInput() []int {
 	fmt.Println("Reading input...")
 
-	// Open the file
-	readFile, err := os.Open("input.txt")
+	inputFile, err := os.Open("input.txt")
 	if err != nil {
 		fmt.Println(err)
 	}
+	defer inputFile.Close()
 
-	// Create the file scanner
-	fileScanner := bufio.NewScanner(readFile)
-
-	// Split the file into lines
-	fileScanner.Split(bufio.ScanLines)
-	var caloryCount []string
-
-	// Get each line and process it
-	for fileScanner.Scan() {
-		caloryCount = append(caloryCount, fileScanner.Text())
-	}
-
-	readFile.Close()
+	fileScanner := bufio.NewScanner(inputFile)
 
 	fmt.Println("Summing calories per Elf...")
-	// fmt.Printf("%v", caloryCount)
+	calorieCountPerElf := []int{}
+	caloriesBroughtByElf := 0
 
-	var caloryCountPerElf []int
-	var caloriesBroughtByElf int = 0
-
-	for _, line := range caloryCount {
+	for fileScanner.Scan() {
+		line := fileScanner.Text()
 
 		if line != "" {
-			// fmt.Println(line)
 			calories, error := strconv.Atoi(line)
 			if error != nil {
 				fmt.Println(err)
 			}
 
-			caloriesBroughtByElf = caloriesBroughtByElf + calories
-
-			// fmt.Println(caloriesBroughtByElf)
+			caloriesBroughtByElf += calories
 		} else {
-			caloryCountPerElf = append(caloryCountPerElf, caloriesBroughtByElf)
+			calorieCountPerElf = append(calorieCountPerElf, caloriesBroughtByElf)
 			caloriesBroughtByElf = 0
 		}
 	}
 
-	// fmt.Printf("%v", caloryCountPerElf)
+	sort.Ints(calorieCountPerElf[:])
+
+	return calorieCountPerElf
+}
+
+// partOne solves the first part of the Advent of Code day 01.
+func partOne(sortedCalorieCountPerElf []int) {
 	// Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
 	fmt.Println("Solution for part 1:")
-	fmt.Println(findMaxElement(caloryCountPerElf))
 
-	// Sort all calories
-	sort.Ints(caloryCountPerElf[:])
-	// fmt.Printf("%v", caloryCountPerElf)
+	highestCalories := sortedCalorieCountPerElf[len(sortedCalorieCountPerElf)-1]
 
-	var numberOfElves int = 3
-	// fmt.Println(caloryCountPerElf[len(caloryCountPerElf)-numberOfElves:])
-	var sumOfCalories int = sum(caloryCountPerElf[len(caloryCountPerElf)-numberOfElves:])
+	fmt.Println(highestCalories)
+}
 
+// partTwo solves the second part of the Advent of Code day 01.
+func partTwo(sortedCalorieCountPerElf []int) {
+	// Find the top three Elves carrying the most Calories. How many Calories are those Elves carrying in total?
 	fmt.Println("Solution for part 2:")
-	fmt.Printf("%v", sumOfCalories)
+
+	numberOfElves := 3
+	sumOfCalories := sum(sortedCalorieCountPerElf[len(sortedCalorieCountPerElf)-numberOfElves:])
+
+	fmt.Println(sumOfCalories)
+}
+
+// main executes the solution to the Advent of Code day 01.
+func main() {
+	calorieCountPerElf := getCalorieCountPerElfFromInput()
+
+	partOne(calorieCountPerElf)
+	partTwo(calorieCountPerElf)
 }
