@@ -50,6 +50,9 @@ func getCalorieCountPerElfFromInput() []int {
 		}
 	}
 
+	// Handle last Elf
+	calorieCountPerElf = append(calorieCountPerElf, caloriesBroughtByElf)
+
 	sort.Ints(calorieCountPerElf[:])
 
 	return calorieCountPerElf
