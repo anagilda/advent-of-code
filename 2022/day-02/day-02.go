@@ -72,9 +72,8 @@ func partTwo(game []Match) {
 		score += matchScore
 
 	}
-	fmt.Printf("The total score of the player 2: %v", score)
-	// 14104 is wrong
 
+	fmt.Printf("The total score of the player 2: %v", score)
 }
 
 // getAllMatchesByCode gets the symbols played for both players in a game of Rock-Paper-Scissors.

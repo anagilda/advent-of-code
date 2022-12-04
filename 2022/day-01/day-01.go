@@ -38,8 +38,8 @@ func getCalorieCountPerElfFromInput() []int {
 		line := fileScanner.Text()
 
 		if line != "" {
-			calories, error := strconv.Atoi(line)
-			if error != nil {
+			calories, err := strconv.Atoi(line)
+			if err != nil {
 				fmt.Println(err)
 			}
 
