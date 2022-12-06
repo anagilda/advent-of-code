@@ -61,12 +61,20 @@ func main() {
 
 	}
 
+	// THIS COPY DOES NOT WORK
+	// containerStacksCopy := make([][]string, len(containerStacks))
+	// copy(containerStacksCopy, containerStacks)
+	// fmt.Println(containerStacks)
+	// fmt.Println(containerStacksCopy)
+
+	// Can only run one at a time
 	partOne(containerStacks, rearrangementProcedure)
-	// partTwo(containerStacks, rearrangementProcedure)
+	partTwo(containerStacks, rearrangementProcedure)
 }
 
 // partOne solves the first part of the Advent of Code day 05.
 // After the rearrangement procedure completes, what crate ends up on top of each stack?
+// CrateMover 9000
 func partOne(containerStacks [][]string, rearrangementProcedure []ContainerRearrangement) {
 	fmt.Println("Solution for part 1:")
 
@@ -100,13 +108,51 @@ func partOne(containerStacks [][]string, rearrangementProcedure []ContainerRearr
 		lastContainerInStack = strings.ReplaceAll(lastContainerInStack, "]", "")
 		firstContainersInStacks += lastContainerInStack
 	}
-	fmt.Print(firstContainersInStacks)
+	fmt.Println(firstContainersInStacks)
 }
 
 // partTwo solves the second part of the Advent of Code day 05.
+// After the rearrangement procedure completes, what crate ends up on top of each stack?
+// CrateMover 9001
 func partTwo(containerStacks [][]string, rearrangementProcedure []ContainerRearrangement) {
 	fmt.Println("Solution for part 2:")
-	panic("unimplemented")
+	fmt.Println(containerStacks)
+
+	for _, instruction := range rearrangementProcedure {
+		// fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		// fmt.Println(containerStacks[instruction.fromStack])
+		// fmt.Println(containerStacks[instruction.toStack])
+
+		// fmt.Println("=====", instruction.numberOfContainers, instruction.fromStack, instruction.toStack)
+
+		var containersToMove []string
+
+		for containersMoved := 0; containersMoved < instruction.numberOfContainers; containersMoved++ {
+			// fmt.Println(containersMoved)
+			// fmt.Printf("---%v-\n", containerToMove)
+
+			containerToMove, updatedFromStack := removeItem(len(containerStacks[instruction.fromStack])-1, containerStacks[instruction.fromStack])
+
+			containerStacks[instruction.fromStack] = updatedFromStack
+			containersToMove = append([]string{containerToMove}, containersToMove...)
+
+		}
+		containerStacks[instruction.toStack] = append(containerStacks[instruction.toStack], containersToMove...)
+
+		// fmt.Println(containerStacks[instruction.fromStack])
+		// fmt.Println(containerStacks[instruction.toStack])
+
+	}
+
+	firstContainersInStacks := ""
+	for _, stack := range containerStacks {
+		// fmt.Println(stack)
+		lastContainerInStack := stack[len(stack)-1]
+		lastContainerInStack = strings.ReplaceAll(lastContainerInStack, "[", "")
+		lastContainerInStack = strings.ReplaceAll(lastContainerInStack, "]", "")
+		firstContainersInStacks += lastContainerInStack
+	}
+	fmt.Print(firstContainersInStacks)
 }
 
 type ContainerRearrangement struct {
