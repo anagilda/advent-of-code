@@ -8,3 +8,4 @@ These should work for any inputs provided by the [Advent of Code 2019](https://a
 **Table of contents:**
 
 * [2019](/2019)
+* [2024](/2024)
