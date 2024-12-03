@@ -1,5 +1,5 @@
 fn main(){
-    println!("Hello, day 1 - part 1!");
+    println!("Hello, day 1!");
     
     // Read input file
     let input = include_str!("../../input.txt");

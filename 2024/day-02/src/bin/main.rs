@@ -1,5 +1,5 @@
 fn main(){
-    println!("Hello, day 1 - part 1!");
+    println!("Hello, day 2!");
     
     // Read input file
     let input = include_str!("../../input.txt");
@@ -8,7 +8,6 @@ fn main(){
     // Complete part 1
     let output_part_1 = part1(input);
     dbg!(output_part_1);
-    // 2164381
 
     // Complete part 2
     let output_part_2 = part2(input);
