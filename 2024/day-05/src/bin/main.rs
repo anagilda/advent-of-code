@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 fn main(){
     println!("Hello, day 3!");
     
@@ -101,9 +103,59 @@ fn part1(_input: &str) -> i32 {
     middle_items.iter().sum()
 }
 
+fn order_manual(pages: &[i32], order_rules: &[(i32, i32)]) -> Vec<i32> {
+    // Create a mapping of all pages that succeed each page
+    let mut graph: HashMap<i32, HashSet<i32>> = HashMap::new();
+    for &(a, b) in order_rules {
+        graph.entry(a).or_default().insert(b);
+    }
+
+    // Sort pages based on graph precedence
+    let mut ordered_pages = pages.to_vec();
+    ordered_pages.sort_by(|&page_a, &page_b| {
+        if is_preceding(page_a, page_b, &graph) {
+            // 'a' should come before 'b'
+            std::cmp::Ordering::Less
+        } else if is_preceding(page_b, page_a, &graph) {
+            // 'a' should come after 'b'
+            std::cmp::Ordering::Greater
+        } else {
+            // No need to change order
+            std::cmp::Ordering::Equal
+        }
+    });
+
+    ordered_pages
+}
+
+fn is_preceding(a: i32, b: i32, graph: &HashMap<i32, HashSet<i32>>) -> bool {
+    // Check if 'a' should precede 'b' in the graph
+    if let Some(precedes) = graph.get(&a) {
+        precedes.contains(&b)
+    } else {
+        false
+    }
+}
+
 
 fn part2(_input: &str) -> i32 {
-    todo!()
+    let (order_rules, manuals_to_print) = parse_input(_input);
+
+    let invalid_manuals: Vec<Vec<i32>> = manuals_to_print
+        .iter()
+        .filter(|pages| !are_manual_pages_in_order(pages, &order_rules))
+        .cloned()
+        .collect();
+
+    let ordered_invalid_manuals: Vec<Vec<i32>> = invalid_manuals
+        .iter()
+        .map(|manual| order_manual(manual, &order_rules))
+        .collect();
+
+    let middle_items = find_middle_pages(&ordered_invalid_manuals);
+    
+    
+    middle_items.iter().sum()
 }
 
 #[cfg(test)]
@@ -170,6 +222,40 @@ mod tests {
 61,13,29
 97,13,75,29,47");
         let expected = 143;
+        assert_eq!(result, expected);
+    }
+        
+    #[test]
+    fn test_part2_example() {
+        let result = part2("47|53
+97|13
+97|61
+97|47
+75|29
+61|13
+75|53
+29|13
+97|29
+53|29
+61|53
+97|53
+61|29
+47|13
+75|47
+97|75
+47|61
+75|61
+47|29
+75|13
+53|13
+
+75,47,61,53,29
+97,61,53,29,13
+75,29,13
+75,97,47,61,53
+61,13,29
+97,13,75,29,47");
+        let expected = 123;
         assert_eq!(result, expected);
     }
 }
