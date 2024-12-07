@@ -80,10 +80,10 @@ fn follow_patrol_protocol(grid: &[Vec<String>], start: (usize, usize), direction
 
 fn part1(_input: &str) -> i32 {
     let lab_map = parse_input(_input);
-    println!("{:?}", lab_map);
+    // println!("{:?}", lab_map);
 
     let initial_guard_position = find_guard_position(&lab_map).expect("Guard not found in the lab map");
-    println!("Guard found at position: {:?}", initial_guard_position);
+    // println!("Guard found at position: {:?}", initial_guard_position);
     
     // Start at the guard position and follow the patrol protocol going up (^)
     let path = follow_patrol_protocol(&lab_map, initial_guard_position, (-1, 0));
@@ -96,10 +96,106 @@ fn part1(_input: &str) -> i32 {
 }
 
 
+fn simulate_patrol_protocol_with_obstructions(
+    lab_map: &Vec<Vec<String>>,
+    initial_position: (usize, usize),
+    initial_direction: (isize, isize),
+) -> Vec<(usize, usize)> {
+    // Movement deltas for right turns (clockwise order: up, right, down, left)
+    let directions = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+
+    let mut positions_for_obstructions = Vec::new();
+
+    let rows = lab_map.len();
+    let columns = lab_map[0].len();
+
+    // Iterate over every position in the lab map
+    for row in 0..rows {
+        for column in 0..columns {
+            // Check if the position is free
+            if lab_map[row][column] == "." {
+                // Clone the lab map and add an obstruction "O" at the current position
+                let mut lab_map_with_obstruction = lab_map.clone();
+                lab_map_with_obstruction[row][column] = "O".to_string();
+                
+                // dbg!(&lab_map_with_obstruction);
+
+                // Simulate patrol
+                let mut current_position = initial_position;
+                let mut current_direction = initial_direction;
+                let mut visited_states = HashSet::new();
+
+                loop {
+                    // dbg!(&current_position);
+
+                    // Record the current state (position and direction)
+                    let state = (current_position, current_direction);
+                    if visited_states.contains(&state) {
+                        // If this state is revisited, break the loop
+                        // for row in &lab_map_with_obstruction {
+                        //     let row_str = row.join(""); // Join each string in the row into a single string
+                        //     println!("{}", row_str);   // Print the row as a string
+                        // }
+                        // println!("{}", "-------------------");
+
+                        positions_for_obstructions.push((row, column));
+                        break;
+                    }
+                    visited_states.insert(state);
+
+                    let (current_row, current_column) = current_position;
+                    let (d_row, d_column) = current_direction;
+
+                    // Calculate the next position
+                    let next_position = (
+                        current_row as isize + d_row,
+                        current_column as isize + d_column,
+                    );
+
+                    // Check bounds and whether the position is obstructed
+                    if next_position.0 >= 0
+                        && next_position.1 >= 0
+                        && (next_position.0 as usize) < rows
+                        && (next_position.1 as usize) < columns
+                    {
+                        let next_row = next_position.0 as usize;
+                        let next_column = next_position.1 as usize;
+
+                        if lab_map_with_obstruction[next_row][next_column] == "#"
+                            || lab_map_with_obstruction[next_row][next_column] == "O"
+                        {
+                            // If obstructed, turn 90 degrees clockwise
+                            let current_index = directions.iter().position(|&d| d == current_direction).unwrap();
+                            current_direction = directions[(current_index + 1) % directions.len()];
+                        } else {
+                            // Otherwise, move forward
+                            current_position = (next_row, next_column);
+                        }
+                    } else {
+                        break; // Stop if moving out of bounds
+                    }
+
+                }
+            }
+        }
+    }
+
+    positions_for_obstructions
+}
+
 
 
 fn part2(_input: &str) -> i32 {
-    todo!()
+    let lab_map = parse_input(_input);
+    // println!("{:?}", lab_map);
+
+    let initial_guard_position = find_guard_position(&lab_map).expect("Guard not found in the lab map");
+    println!("Guard found at position: {:?}", initial_guard_position);
+
+    let obstruction_positions = simulate_patrol_protocol_with_obstructions(&lab_map, initial_guard_position, (-1, 0));
+    // println!("Obstruction positions: {:?}", obstruction_positions);
+
+    obstruction_positions.len() as i32
 }
 
 #[cfg(test)]
@@ -119,6 +215,22 @@ mod tests {
 #.........
 ......#...");
         let expected = 41;
+        assert_eq!(result, expected);
+    }
+        
+    #[test]
+    fn test_part2_example() {
+        let result = part2("....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#..^.....
+........#.
+#.........
+......#...");
+        let expected = 6;
         assert_eq!(result, expected);
     }
 }
