@@ -85,8 +85,8 @@ fn find_middle_pages(valid_manuals: &[Vec<i32>]) -> Vec<i32> {
 fn part1(_input: &str) -> i32 {
     let (order_rules, manuals_to_print) = parse_input(_input);
 
-    println!("Order Rules: {:?}", order_rules);
-    println!("Manual Pages to Print: {:?}", manuals_to_print);
+    // println!("Order Rules: {:?}", order_rules);
+    // println!("Manual Pages to Print: {:?}", manuals_to_print);
 
     let correct_manuals_to_print: Vec<Vec<i32>> = manuals_to_print
         .iter()
