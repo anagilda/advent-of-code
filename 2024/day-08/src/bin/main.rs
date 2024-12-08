@@ -28,7 +28,7 @@ fn parse_input(input: &str) -> Vec<Vec<String>> {
         .collect()
 }
 
-fn map_antennas_to_antinodes(grid: &[Vec<String>]) -> HashMap<String, Vec<Coordinate>> {
+fn map_antennas_to_antinodes(grid: &[Vec<String>], with_resonant_harmonics: bool) -> HashMap<String, Vec<Coordinate>> {
     let mut antennas_coordinates: HashMap<String, Vec<Coordinate>> = HashMap::new();
 
     for (row, line) in grid.iter().enumerate() {
@@ -42,7 +42,11 @@ fn map_antennas_to_antinodes(grid: &[Vec<String>]) -> HashMap<String, Vec<Coordi
         }
     }
 
-    calculate_antinodes(&antennas_coordinates, (grid.len() as i32, grid[0].len() as i32))
+    if with_resonant_harmonics {
+        return calculate_antinodes_with_resonant_harmonics(&antennas_coordinates, (grid.len() as i32, grid[0].len() as i32))
+    } else {
+        return calculate_antinodes(&antennas_coordinates, (grid.len() as i32, grid[0].len() as i32))
+    }
 }
 
 fn calculate_antinodes(
@@ -89,6 +93,46 @@ fn calculate_antinodes(
     antinodes
 }
 
+
+fn calculate_antinodes_with_resonant_harmonics(
+    antennas_coordinates: &HashMap<String, Vec<Coordinate>>,
+    grid_size: (i32, i32), // (rows, columns)
+) -> HashMap<String, Vec<Coordinate>> {
+    let mut antinodes: HashMap<String, Vec<Coordinate>> = HashMap::new();
+
+    for (&ref character, coordinates) in antennas_coordinates.iter() {
+        let mut character_antinodes = coordinates.clone();
+
+        for i in 0..coordinates.len() {
+            for j in i + 1..coordinates.len() {
+                let (x1, y1) = coordinates[i];
+                let (x2, y2) = coordinates[j];
+
+                // Calculate the distance (dx, dy)
+                let dx = x2 - x1;
+                let dy = y2 - y1;
+
+                // Calculate and repeatedly extend coordinates for the antinodes
+                let mut current_antinode = (x1 - dx, y1 - dy);
+                while is_within_bounds(current_antinode, grid_size) {
+                    character_antinodes.push(current_antinode);
+                    current_antinode = (current_antinode.0 - dx, current_antinode.1 - dy); // Extend further
+                }
+
+                let mut current_antinode = (x2 + dx, y2 + dy);
+                while is_within_bounds(current_antinode, grid_size) {
+                    character_antinodes.push(current_antinode);
+                    current_antinode = (current_antinode.0 + dx, current_antinode.1 + dy); // Extend further
+                }
+            }
+        }
+
+        antinodes.insert(character.to_string(), character_antinodes);
+    }
+
+    antinodes
+}
+
 fn is_within_bounds(coord: Coordinate, grid_size: (i32, i32)) -> bool {
     let (rows, cols) = grid_size;
     let (x, y) = coord;
@@ -99,7 +143,7 @@ fn part1(input: &str) -> i32 {
     let antenna_map = parse_input(input);
     // dbg!(&antenna_map);
 
-    let antennas_to_antinodes = map_antennas_to_antinodes(&antenna_map);
+    let antennas_to_antinodes = map_antennas_to_antinodes(&antenna_map, false);
     dbg!(&antennas_to_antinodes);
 
     let unique_coordinates: HashSet<(i32, i32)> = antennas_to_antinodes
@@ -112,8 +156,19 @@ fn part1(input: &str) -> i32 {
 
 
 
-fn part2(_input: &str) -> i32 {
-    todo!()
+fn part2(input: &str) -> i32 {
+    let antenna_map = parse_input(input);
+    // dbg!(&antenna_map);
+
+    let antennas_to_antinodes = map_antennas_to_antinodes(&antenna_map, true);
+    dbg!(&antennas_to_antinodes);
+
+    let unique_coordinates: HashSet<(i32, i32)> = antennas_to_antinodes
+    .values()
+    .flat_map(|coords| coords.iter().cloned())
+    .collect();
+
+    unique_coordinates.len() as i32
 }
 
 #[cfg(test)]
@@ -135,6 +190,24 @@ mod tests {
 ............
 ............");
         let expected = 14;
+        assert_eq!(result, expected);
+    }
+        
+    #[test]
+    fn test_part2_example() {
+        let result = part2("............
+........0...
+.....0......
+.......0....
+....0.......
+......A.....
+............
+............
+........A...
+.........A..
+............
+............");
+        let expected = 34;
         assert_eq!(result, expected);
     }
 }
