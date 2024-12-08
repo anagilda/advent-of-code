@@ -59,6 +59,12 @@ fn evaluate_expression(expression: &str) -> i64 {
         match operator.as_str() {
             "+" => result += next_num,  // Add to the result
             "*" => result *= next_num,  // Multiply to the result
+            "|" => {
+                // || is the concatenation operator, for simplicity it is just | here
+                // Concatenate both numbers around the operator
+                let concatenated = format!("{}{}", result, next_num);
+                result = concatenated.parse::<i64>().expect("Invalid concatenation result");
+            }, 
             _ => panic!("Unexpected operator: {}", operator),
         }
 
@@ -68,9 +74,8 @@ fn evaluate_expression(expression: &str) -> i64 {
     result
 }
 
-fn can_equal_total_in_order(numbers: &[i64], total: i64) -> bool {
+fn can_equal_total_in_order(numbers: &[i64], total: i64, operators: Vec<char>) -> bool {
     let n = numbers.len();
-    let operators = vec!['+', '*'];
 
     // Generate all combinations of operators between the numbers
     let operator_combinations = (0..n - 1).map(|_| &operators).multi_cartesian_product();
@@ -86,10 +91,11 @@ fn can_equal_total_in_order(numbers: &[i64], total: i64) -> bool {
             expression.push_str(&num.to_string());
         }
 
-        dbg!(&expression);
+        // dbg!(&expression);
 
         // Evaluate the expression
         if evaluate_expression(&expression) == total {
+            dbg!(total, &expression);
             return true;
         }
     }
@@ -98,7 +104,7 @@ fn can_equal_total_in_order(numbers: &[i64], total: i64) -> bool {
 }
 
 
-fn check_expression_is_valid(line: &str) -> bool {
+fn check_expression_is_valid(line: &str, operators: Vec<char>) -> bool {
     // Split the line into total and numbers
     if let Some((total_str, numbers_str)) = line.split_once(':') {
         let total: i64 = total_str.trim().parse().expect("Invalid total number");
@@ -108,21 +114,23 @@ fn check_expression_is_valid(line: &str) -> bool {
             .map(|num| num.parse().expect("Invalid number in list"))
             .collect();
 
-        return can_equal_total_in_order(&numbers, total);
+        return can_equal_total_in_order(&numbers, total, operators);
     }
     false
 }
 
-fn process_input(input: &str) -> HashMap<i64, bool> {
+fn process_input(input: &str, operators: Vec<char>) -> HashMap<i64, bool> {
     let mut results = HashMap::new();
     for line in input.lines() {
         if !line.trim().is_empty() {
-            let valid = check_expression_is_valid(line);
+            let valid = check_expression_is_valid(line, operators.clone());
 
             // dbg!(&valid);
             if let Some((total_str, _)) = line.split_once(':') {
                 let total: i64 = total_str.trim().parse().expect("Invalid total number");
                 results.insert(total, valid);
+
+                // dbg!(&line);
             }
         }
     }
@@ -153,7 +161,8 @@ fn part1(input: &str) -> i64 {
     let equation_numbers = parse_input(input);
     println!("{:?}", equation_numbers);
 
-    let results = process_input(input);
+    let operators = vec!['+', '*'];
+    let results = process_input(input, operators.clone());
 
     // dbg!(&results);
 
@@ -165,8 +174,19 @@ fn part1(input: &str) -> i64 {
 
 
 
-fn part2(_input: &str) -> i64 {
-    todo!()
+fn part2(input: &str) -> i64 {
+    let equation_numbers = parse_input(input);
+    println!("{:?}", equation_numbers);
+
+    let operators = vec!['+', '*', '|'];
+    let results = process_input(input, operators.clone());
+
+    // dbg!(&results);
+
+    results.iter()
+    .filter(|&(_, &is_true)| is_true)  // Filter only the ones where value is true
+    .map(|(&key, _)| key)               // Map the keys
+    .sum()     
 }
 
 #[cfg(test)]
@@ -185,6 +205,21 @@ mod tests {
 21037: 9 7 18 13
 292: 11 6 16 20");
         let expected = 3749;
+        assert_eq!(result, expected);
+    }
+        
+    #[test]
+    fn test_part2_example() {
+        let result = part2("190: 10 19
+3267: 81 40 27
+83: 17 5
+156: 15 6
+7290: 6 8 6 15
+161011: 16 10 13
+192: 17 8 14
+21037: 9 7 18 13
+292: 11 6 16 20");
+        let expected = 11387;
         assert_eq!(result, expected);
     }
 }
