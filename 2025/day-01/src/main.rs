@@ -28,7 +28,7 @@ fn parse_input(input: &str) -> Vec<Instruction> {
         .collect()
 }
 
-fn part1(instructions: &Vec<Instruction>) -> i32 {
+fn part1(instructions: &[Instruction]) -> i32 {
     let mut dial_position = 50;
     let mut counter: i32 = 0;
 
@@ -58,8 +58,31 @@ fn part1(instructions: &Vec<Instruction>) -> i32 {
     counter
 }
 
-fn part2(_input: &Vec<Instruction>) -> i32 {
-    0
+fn part2(instructions: &[Instruction]) -> i32 {
+    let mut dial_position: i32 = 50;
+    let mut counter: i32 = 0;
+
+
+    for instruction in instructions {
+
+        let step = match instruction.direction {
+            'L' => -1,
+            'R' => 1,
+            _ => panic!("Unknown direction {}", instruction.direction),
+        };
+
+        for _ in 0..instruction.times {
+            dial_position = (dial_position + step).rem_euclid(100);  // wrap 0–99
+
+            if dial_position == 0 {
+                counter += 1;
+            }
+        }
+
+        // println!("Current 📍: {}", &dial_position);
+    }
+
+    counter
 }
 
 #[cfg(test)]
@@ -78,6 +101,6 @@ mod tests {
     fn test_example_part2() {
         let file_input = fs::read_to_string("example.txt").unwrap();
         let input = parse_input(&file_input);
-        assert_eq!(part2(&input), 0);
+        assert_eq!(part2(&input), 6);
     }
 }
